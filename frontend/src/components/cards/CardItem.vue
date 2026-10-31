@@ -7,7 +7,7 @@ import AppIcon from '@/components/common/AppIcon.vue'
 import type { Card } from '@/types'
 import { isOverdue } from '@/utils/date'
 
-const props = defineProps<{ card: Card }>()
+const props = defineProps<{ card: Card; saving?: boolean }>()
 const emit = defineEmits<{ open: [] }>()
 
 const overdue = computed(() => isOverdue(props.card))
@@ -16,7 +16,11 @@ const overdue = computed(() => isOverdue(props.card))
 <template>
   <article
     class="card-item"
-    :class="{ 'card-item--overdue': overdue, 'card-item--completed': card.isCompleted }"
+    :class="{
+      'card-item--overdue': overdue,
+      'card-item--completed': card.isCompleted,
+      'card-item--saving': saving,
+    }"
     role="button"
     tabindex="0"
     @click="emit('open')"
@@ -55,6 +59,17 @@ const overdue = computed(() => isOverdue(props.card))
 .card-item--overdue {
   border-left-color: var(--color-danger);
   background: var(--color-danger-soft);
+}
+
+.card-item--saving {
+  opacity: 0.65;
+}
+
+/* The placeholder showing where the dragged card will land. */
+.card-item--ghost {
+  background: var(--color-primary-soft);
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+  opacity: 0.6;
 }
 
 .card-item--completed .card-item__title {

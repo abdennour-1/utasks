@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import draggable from 'vuedraggable'
 
 import ListHeader from './ListHeader.vue'
 import CardItem from '@/components/cards/CardItem.vue'
@@ -7,21 +8,68 @@ import AppIcon from '@/components/common/AppIcon.vue'
 import { useBoardStore } from '@/stores/board'
 import type { BoardList, Card } from '@/types'
 
+interface CardDragChange {
+  added?: { element: Card; newIndex: number }
+  moved?: { oldIndex: number; newIndex: number }
+}
+
 const props = defineProps<{ list: BoardList }>()
 const emit = defineEmits<{ 'add-card': []; 'open-card': [card: Card] }>()
 
 const store = useBoardStore()
 
 const cards = computed(() => store.cardsByList[props.list.id] ?? [])
+
+function onDragChange(change: CardDragChange) {
+  if (change.added) {
+    store.moveCard(change.added.element.id, props.list.id, change.added.newIndex)
+  } else if (change.moved) {
+    store.reorderCard(props.list.id, change.moved.oldIndex, change.moved.newIndex)
+  }
+}
 </script>
 
 <template>
   <section class="list-column">
     <ListHeader :list="list" :card-count="cards.length" />
 
-    <div class="list-column__cards">
+    <div class="list-column__body">
       <p v-if="cards.length === 0" class="list-column__empty">No cards yet</p>
-      <CardItem v-for="card in cards" :key="card.id" :card="card" @open="emit('open-card', card)" />
+      <!--
+        On touch screens, a short hold starts the drag so that swiping still scrolls.
+        A card being saved cannot be dragged, which rules out overlapping updates.
+      -->
+      <draggable
+        class="list-column__cards"
+        :model-value="cards"
+        item-key="id"
+        group="cards"
+        filter=".card-item--saving"
+        ghost-class="card-item--ghost"
+        :prevent-on-filter="false"
+        :animation="150"
+        :force-fallback="true"
+        :fallback-tolerance="4"
+        :fallback-on-body="true"
+        :delay="180"
+        :delay-on-touch-only="true"
+        :touch-start-threshold="6"
+        :empty-insert-threshold="24"
+        :scroll-sensitivity="70"
+        :scroll-speed="14"
+        :bubble-scroll="true"
+        @start="store.isDragging = true"
+        @end="store.isDragging = false"
+        @change="onDragChange"
+      >
+        <template #item="{ element }">
+          <CardItem
+            :card="element"
+            :saving="store.savingCardIds.has(element.id)"
+            @open="emit('open-card', element)"
+          />
+        </template>
+      </draggable>
     </div>
 
     <button class="list-column__add" type="button" @click="emit('add-card')">
@@ -40,11 +88,19 @@ const cards = computed(() => store.cardsByList[props.list.id] ?? [])
   max-height: 100%;
   border-radius: var(--radius-lg);
   background: var(--color-surface-muted);
+  color: var(--color-text);
   scroll-snap-align: start;
 }
 
-.list-column__cards {
+.list-column__body {
   position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.list-column__cards {
   display: flex;
   flex: 1;
   flex-direction: column;

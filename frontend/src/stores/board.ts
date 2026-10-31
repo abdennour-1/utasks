@@ -25,6 +25,8 @@ export const useBoardStore = defineStore('board', () => {
   const cardsByList = ref<Record<string, Card[]>>({})
   const status = ref<LoadStatus>('idle')
   const loadError = ref<string | null>(null)
+  const savingCardIds = ref(new Set<string>())
+  const isDragging = ref(false)
   let latestLoad = 0
 
   function persistLayout() {
@@ -176,13 +178,72 @@ export const useBoardStore = defineStore('board', () => {
     }
   }
 
+  /** Optimistic: the card moves at once and only this card goes back if the API refuses. */
+  async function moveCard(cardId: string, targetListId: string, targetIndex: number) {
+    const sourceListId = Object.keys(cardsByList.value).find((listId) =>
+      cardsByList.value[listId]?.some((card) => card.id === cardId),
+    )
+    const sourceColumn = sourceListId ? cardsByList.value[sourceListId] : undefined
+    const sourceIndex = sourceColumn?.findIndex((card) => card.id === cardId) ?? -1
+    const card = sourceColumn?.[sourceIndex]
+    if (!sourceListId || !card || sourceListId === targetListId) return
+
+    const place = (listId: string, index: number, placed: Card) => {
+      const column = [...(cardsByList.value[listId] ?? [])]
+      column.splice(index, 0, placed)
+      cardsByList.value[listId] = column
+    }
+    const take = (listId: string) => {
+      cardsByList.value[listId] = (cardsByList.value[listId] ?? []).filter(
+        (item) => item.id !== cardId,
+      )
+    }
+
+    take(sourceListId)
+    place(targetListId, targetIndex, { ...card, listId: targetListId })
+    persistLayout()
+    savingCardIds.value.add(cardId)
+    try {
+      const { id, ...fields } = card
+      await cardsApi.updateCard(id, { ...fields, listId: targetListId })
+    } catch (error) {
+      take(targetListId)
+      place(sourceListId, sourceIndex, card)
+      persistLayout()
+      toasts.error(`Could not move "${card.title}". ${errorMessage(error)}`)
+    } finally {
+      savingCardIds.value.delete(cardId)
+    }
+  }
+
+  /** The API has no position field: this order only lives in the local layout. */
+  function reorderCard(listId: string, oldIndex: number, newIndex: number) {
+    const column = [...(cardsByList.value[listId] ?? [])]
+    const [card] = column.splice(oldIndex, 1)
+    if (!card) return
+    column.splice(newIndex, 0, card)
+    cardsByList.value[listId] = column
+    persistLayout()
+  }
+
+  /** The API has no position field: this order only lives in the local layout. */
+  function reorderLists(next: BoardList[]) {
+    lists.value = next
+    persistLayout()
+  }
+
   return {
     board,
     lists,
     cardsByList,
+    savingCardIds,
+    isDragging,
     status,
     loadError,
     load,
+    moveCard,
+    reorderCard,
+    reorderLists,
     renameBoard,
     createList,
     renameList,

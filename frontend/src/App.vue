@@ -34,6 +34,7 @@ const showHeader = computed(() => auth.isAuthenticated && !route.meta.guestOnly)
   display: flex;
   flex-direction: column;
   height: 100%;
+  height: 100dvh;
 }
 
 .app__content {

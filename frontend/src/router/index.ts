@@ -32,6 +32,13 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/boards/:id',
+      name: 'board',
+      component: () => import('@/views/BoardDetailView.vue'),
+      props: true,
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/views/NotFoundView.vue'),

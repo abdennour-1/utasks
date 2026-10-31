@@ -1,12 +1,12 @@
 # UTasks
 
-A simplified Trello clone: a Vue 3 front-end that consumes the existing [UTasks API](https://utasks-026af75f15a3.herokuapp.com/docs/).
+Un clone simplifié de Trello : une application front-end Vue 3 qui consomme l'[API UTasks](https://utasks-026af75f15a3.herokuapp.com/docs/) existante.
 
-This is deliverable 1. All the code is in `frontend/`; deliverable 2 will add `backend/`.
+Ce dépôt correspond au livrable 1. Tout le code se trouve dans `frontend/` ; le livrable 2 ajoutera `backend/`.
 
-## Getting started
+## Démarrage
 
-**Prerequisites:** Node.js 22.18+ or 24.12+ (tested with 24.21) and npm, plus Google Chrome.
+**Prérequis :** Node.js 22.18+ ou 24.12+ (testé avec la 24.21) et npm, ainsi que Google Chrome.
 
 ```bash
 cd frontend
@@ -14,64 +14,66 @@ npm install
 npm run dev
 ```
 
-Then open **http://localhost:5173**.
+Ouvrez ensuite **http://localhost:5173**.
 
-The first API call can take several seconds if the Heroku server is asleep.
+Le premier appel à l'API peut prendre plusieurs secondes si le serveur Heroku est en veille.
 
-To test on a real phone or tablet on the same network, run `npm run dev -- --host` and open the "Network" URL it prints.
+Pour tester sur un vrai téléphone ou une vraie tablette connectés au même réseau, lancez `npm run dev -- --host` et ouvrez l'URL « Network » affichée.
 
-| Command | Purpose |
+| Commande | Rôle |
 | --- | --- |
-| `npm run dev` | Start the development server |
-| `npm run build` | Type-check and build for production |
-| `npm run preview` | Serve the production build |
-| `npm run lint` | Run oxlint and ESLint |
-| `npm run format` | Format the code with Prettier |
+| `npm run dev` | Démarre le serveur de développement |
+| `npm run build` | Vérifie les types et compile pour la production |
+| `npm run preview` | Sert le build de production |
+| `npm run lint` | Lance oxlint et ESLint |
+| `npm run format` | Formate le code avec Prettier |
 
-## How to test each feature
+## Comment tester chaque fonctionnalité
 
-To test iPad and iPhone in Chrome, open DevTools (F12) and toggle the device toolbar (Ctrl+Shift+M). **Reload the page after switching device** so that touch input is detected.
+L'interface est en anglais : les libellés en gras ci-dessous sont ceux affichés à l'écran.
 
-| # | Feature | Points | How to test |
+Pour tester l'iPad et l'iPhone dans Chrome, ouvrez DevTools (F12) et activez la barre d'appareils (Ctrl+Shift+M). **Rechargez la page après chaque changement d'appareil** pour que le tactile soit détecté.
+
+| # | Fonctionnalité | Points | Comment tester |
 | --- | --- | --- | --- |
-| 1 | Create a user | /3 | Click **Create one** and choose a username. The next screen shows your user ID. An existing username shows an error on the field. |
-| 2 | Log in | | Click **Log out**, then log in with the username (not case-sensitive). The session survives a reload. Opening `/boards` while logged out redirects to the login page. See [Known limitations](#known-limitations) for logging in from another browser. |
-| 3 | Create boards | /5 | On **My boards**, click **Create a board** or **New board**. Boards are shown in a grid. |
-| 4 | Create a list | /5 | Open a board and click **Add a list**. |
-| 5 | Create a card | /5 | In a list, click **Add a card**. All the fields are required by the API. Choose a past date to see the overdue highlight. |
-| 6 | View boards, lists and cards | /3 | The board shows its lists as columns with horizontal scrolling. On iPhone, the columns snap into place when swiping. |
-| 7 | Edit | /5 | Click a board title or a list title to rename it (Enter saves, Esc cancels). Use the pencil icon on **My boards** to edit a board and its description. Click a card to open its details. |
-| 8 | Delete | /3 | Use the trash icons on boards and lists, and **Delete** in the card details. Each one asks for confirmation. |
-| 9 | Drag cards between lists | /20 | Drag a card to another list, including an empty one, then reload: the change persists. **On touch screens, hold the card for a moment before moving it**; a quick swipe scrolls instead. Drag near the screen edge to scroll to the next column. |
-| 10 | Reorder lists | /20 | Drag a list by its **dotted handle**, left of its title, for example to swap lists 1 and 3. Reload: the order persists. |
-| 11 | Sort cards | /15 | Use the **Sort** selector of a list: Manual, Priority, Due date, or Priority then due date. The button next to it reverses the direction. Each list has its own sort. While a sort is active, cards cannot be reordered inside the list but can still move to another list. |
-| 12 | Error handling | /8 | See below. |
+| 1 | Créer un usager | /3 | Cliquez sur **Create one** et choisissez un nom d'usager. L'écran suivant affiche votre user ID. Un nom déjà pris affiche une erreur sous le champ. |
+| 2 | Se connecter | | Cliquez sur **Log out**, puis connectez-vous avec le nom d'usager (sans tenir compte de la casse). La session survit à un rechargement. Ouvrir `/boards` sans être connecté redirige vers la page de connexion. Pour une connexion depuis un autre navigateur, voir [Limites connues](#limites-connues). |
+| 3 | Créer des boards | /5 | Sur **My boards**, cliquez sur **Create a board** ou **New board**. Les boards s'affichent en grille. |
+| 4 | Créer une liste | /5 | Ouvrez un board et cliquez sur **Add a list**. |
+| 5 | Créer une carte | /5 | Dans une liste, cliquez sur **Add a card**. L'API exige tous les champs. Choisissez une date passée pour voir la mise en évidence des cartes en retard. |
+| 6 | Visualiser les boards, listes et cartes | /3 | Le board affiche ses listes en colonnes avec un défilement horizontal. Sur iPhone, les colonnes se calent en place lors du balayage. |
+| 7 | Modifier | /5 | Cliquez sur le titre d'un board ou d'une liste pour le renommer (Entrée enregistre, Échap annule). Sur **My boards**, l'icône crayon permet de modifier un board et sa description. Cliquez sur une carte pour ouvrir son détail. |
+| 8 | Supprimer | /3 | Utilisez les icônes de corbeille des boards et des listes, et **Delete** dans le détail d'une carte. Chaque suppression demande une confirmation. |
+| 9 | Glisser les cartes d'une liste à l'autre | /20 | Glissez une carte vers une autre liste, même vide, puis rechargez : le changement est conservé. **Au toucher, maintenez la carte un court instant avant de la déplacer** ; un balayage rapide fait défiler la page. Glissez près du bord de l'écran pour atteindre la colonne suivante. |
+| 10 | Réordonner les listes | /20 | Glissez une liste par sa **poignée à points**, à gauche du titre, par exemple pour échanger les listes 1 et 3. Rechargez : l'ordre est conservé. |
+| 11 | Trier les cartes | /15 | Utilisez le sélecteur **Sort** d'une liste : Manual, Priority, Due date ou Priority then due date. Le bouton voisin inverse le sens. Chaque liste a son propre tri. Tant qu'un tri est actif, les cartes ne peuvent pas être réordonnées dans la liste, mais peuvent toujours aller vers une autre liste. |
+| 12 | Gestion d'erreur | /8 | Voir ci-dessous. |
 
-**Testing error handling (12):**
+**Tester la gestion d'erreur (12) :**
 
-- **Validation:** submit a form that is empty or too long. For example, a card description has a limit of 30 characters.
-- **Offline:** in DevTools, set Network to **Offline**. A banner appears, and failed actions show a toast. Moving a card puts it back in its original list.
-- **Server errors:** in the DevTools Network panel, block a request or override its response with a 500. Loading errors show a **Try again** button.
-- **Not found:** open `/boards/unknown` or `/nope`.
-- **Loading and empty states:** throttle the network to see the skeletons, and use a new account to see "No boards yet".
+- **Validation :** envoyez un formulaire vide ou trop long. Par exemple, la description d'une carte est limitée à 30 caractères.
+- **Hors ligne :** dans DevTools, réglez Network sur **Offline**. Un bandeau apparaît et les actions qui échouent affichent un toast. Une carte déplacée revient dans sa liste d'origine.
+- **Erreurs serveur :** dans le panneau Network de DevTools, bloquez une requête ou remplacez sa réponse par une erreur 500. Les erreurs de chargement affichent un bouton **Try again**.
+- **Page introuvable :** ouvrez `/boards/unknown` ou `/nope`.
+- **États de chargement et états vides :** ralentissez le réseau pour voir les skeletons, et utilisez un nouveau compte pour voir « No boards yet ».
 
-## Technical choices
+## Choix techniques
 
-- **Stack:** Vue 3 with `<script setup>`, TypeScript, Vite, vue-router, Pinia and axios.
-- **Drag and drop:** `vuedraggable@next` (SortableJS), which handles touch input.
-- **`src/api/`:** one file per resource, plus `client.ts`, the shared axios instance. Its interceptor turns every failure into an `ApiError` with an English message.
-- **`src/stores/`:** the only callers of the API layer for boards, lists and cards. Components call store actions.
-- **Optimistic moves:** a dragged card moves at once. If the API refuses, only that card goes back and a toast explains why. A card being saved cannot be dragged again, which rules out overlapping updates.
-- **Sorting:** a pure function (`utils/cardSort.ts`) computes the displayed order, so the manual order is kept and restored when going back to Manual. In "Priority then due date", the direction applies to the priority, and ties always show the earliest due date first.
-- **Form limits:** the API returns a 500 for some values that are too long, so forms check them first. The observed limits are in [docs/API_NOTES.md](docs/API_NOTES.md).
+- **Stack :** Vue 3 avec `<script setup>`, TypeScript, Vite, vue-router, Pinia et axios.
+- **Drag and drop :** `vuedraggable@next` (SortableJS), qui gère le tactile.
+- **`src/api/` :** un fichier par ressource, plus `client.ts`, l'instance axios partagée. Son intercepteur transforme chaque échec en `ApiError` avec un message en anglais.
+- **`src/stores/` :** seuls appelants de la couche API pour les boards, les listes et les cartes. Les composants appellent les actions des stores.
+- **Déplacements optimistes :** une carte glissée se déplace immédiatement. Si l'API refuse, seule cette carte revient en arrière et un toast explique pourquoi. Une carte en cours d'enregistrement ne peut pas être glissée de nouveau, ce qui évite les mises à jour simultanées.
+- **Tri :** une fonction pure (`utils/cardSort.ts`) calcule l'ordre affiché ; l'ordre manuel est donc conservé et restauré au retour sur Manual. Dans « Priority then due date », le sens s'applique à la priorité, et à priorité égale la date d'échéance la plus proche passe toujours en premier.
+- **Limites des formulaires :** l'API renvoie une erreur 500 pour certaines valeurs trop longues, donc les formulaires les vérifient avant l'envoi. Les limites observées sont dans [docs/API_NOTES.md](docs/API_NOTES.md).
 
-## Known limitations
+## Limites connues
 
-These all come from what the API offers. Details are in [docs/API_NOTES.md](docs/API_NOTES.md).
+Elles découlent toutes de ce que l'API propose. Les détails sont dans [docs/API_NOTES.md](docs/API_NOTES.md).
 
-- **Logging in on another browser or device needs the user ID.** The API has no login endpoint, no lookup by username and no way to list users. Accounts are therefore remembered in the browser's `localStorage` when they are created or first used. To log in where the username is not known, the form asks once for the user ID shown after registration. After that, the username is enough on that browser.
-- **The order of the lists is stored locally.** The API has no `position` or `order` field, so the order is kept in `localStorage`, per board. The same goes for the manual order of cards inside a list and for each list's sort selection. These do not follow the user to another browser. In contrast, moving a card to another list is saved through the API.
-- **No real security.** The API has no authentication and does not check ownership. The route guard and the "my boards" filter are client-side only.
-- **Card fields are all required by the API.** Description (1 to 30 characters), priority and due date must be filled in, so there is no title-only quick add.
-- **Network errors in the console.** The app logs nothing itself and handles every failed call, but Chrome always prints a "Failed to load resource" line for a failed request. It can appear for an expected error, such as a username already taken.
-- **Drag and drop has no keyboard alternative.**
+- **La connexion depuis un autre navigateur ou appareil demande le user ID.** L'API n'a ni endpoint de connexion, ni recherche par nom d'usager, ni moyen de lister les usagers. Les comptes sont donc mémorisés dans le `localStorage` du navigateur à leur création ou à leur première utilisation. Si le nom d'usager n'y est pas connu, le formulaire demande une fois le user ID affiché après l'inscription. Ensuite, le nom d'usager suffit sur ce navigateur.
+- **L'ordre des listes est stocké localement.** L'API n'a pas de champ `position` ou `order` ; l'ordre est donc conservé dans le `localStorage`, par board. Il en va de même pour l'ordre manuel des cartes dans une liste et pour le tri choisi sur chaque liste. Ces réglages ne suivent pas l'usager sur un autre navigateur. En revanche, le déplacement d'une carte vers une autre liste est bien enregistré par l'API.
+- **Aucune vraie sécurité.** L'API n'a pas d'authentification et ne vérifie pas la propriété des données. Le guard de routes et le filtre « mes boards » existent uniquement côté client.
+- **Tous les champs d'une carte sont exigés par l'API.** La description (1 à 30 caractères), la priorité et la date d'échéance sont obligatoires ; il n'y a donc pas de création rapide avec le titre seul.
+- **Erreurs réseau dans la console.** L'application n'écrit rien elle-même dans la console et gère chaque appel en échec, mais Chrome affiche toujours une ligne « Failed to load resource » pour une requête en erreur. Elle peut apparaître pour une erreur attendue, comme un nom d'usager déjà pris.
+- **Le drag and drop n'a pas d'alternative au clavier.**

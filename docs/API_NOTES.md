@@ -97,10 +97,10 @@ Some limits only surface as a 500, so the forms have to enforce them before send
 - **Malformed id:** 400 `Invalid ID format`. Valid format but unknown id: 404. Unknown route: 404.
 - **CORS:** `Access-Control-Allow-Origin: *`, with GET, POST, PUT and DELETE. No dev proxy needed.
 
-## Login options
+## Login
 
-The only documented ways to get a user's id are the register response and already knowing the id.
+The only documented ways to get a user's id are the register response and already knowing the id. No endpoint lists the users: the spec has none, and `GET /api/users` returns 404 (the `ApiResponseUsers` schema exists but no path uses it).
 
-**Chosen approach, pending confirmation:** keep a `username -> id` directory in `localStorage`, filled at registration. Login looks the username up, then verifies the id with `GET /api/users/{id}`. If the username is unknown on this browser, the form offers a "User ID" field, and the id is displayed after registration so it can be copied.
+**Chosen approach:** keep a `username -> id` directory in `localStorage`, filled at registration. Login looks the username up (case-insensitive), then verifies the id with `GET /api/users/{id}`. If the username is unknown on this browser, the form asks for the user ID, which is displayed after registration so it can be copied.
 
 **Known limitation:** an account created on another browser or device needs its user ID the first time it logs in on a new one.

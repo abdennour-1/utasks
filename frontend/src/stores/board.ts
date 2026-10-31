@@ -10,6 +10,7 @@ import type { LoadStatus } from '@/stores/boards'
 import { useToastsStore } from '@/stores/toasts'
 import type { Board, BoardList, Card, CardDraft, CardUpdate } from '@/types'
 import { applyOrder, loadBoardLayout, saveBoardLayout } from '@/utils/boardLayout'
+import { MANUAL_SORT, sortCards, type ListSort } from '@/utils/cardSort'
 
 function isMissing(error: unknown): boolean {
   return error instanceof ApiError && (error.kind === 'not-found' || error.kind === 'validation')
@@ -25,6 +26,7 @@ export const useBoardStore = defineStore('board', () => {
   const cardsByList = ref<Record<string, Card[]>>({})
   const status = ref<LoadStatus>('idle')
   const loadError = ref<string | null>(null)
+  const sortByList = ref<Record<string, ListSort>>({})
   const savingCardIds = ref(new Set<string>())
   const isDragging = ref(false)
   let latestLoad = 0
@@ -32,10 +34,25 @@ export const useBoardStore = defineStore('board', () => {
   function persistLayout() {
     if (!board.value) return
     const cards: Record<string, string[]> = {}
+    const sorts: Record<string, ListSort> = {}
     for (const list of lists.value) {
       cards[list.id] = (cardsByList.value[list.id] ?? []).map((card) => card.id)
+      sorts[list.id] = listSort(list.id)
     }
-    saveBoardLayout(board.value.id, { lists: lists.value.map((list) => list.id), cards })
+    saveBoardLayout(board.value.id, { lists: lists.value.map((list) => list.id), cards, sorts })
+  }
+
+  function listSort(listId: string): ListSort {
+    return sortByList.value[listId] ?? MANUAL_SORT
+  }
+
+  function setListSort(listId: string, sort: ListSort) {
+    sortByList.value[listId] = sort
+    persistLayout()
+  }
+
+  function displayedCards(listId: string): Card[] {
+    return sortCards(cardsByList.value[listId] ?? [], listSort(listId))
   }
 
   async function load(boardId: string) {
@@ -68,6 +85,7 @@ export const useBoardStore = defineStore('board', () => {
       board.value = fetchedBoard
       lists.value = applyOrder([...fetchedLists].reverse(), layout.lists)
       cardsByList.value = cards
+      sortByList.value = layout.sorts
       status.value = 'ready'
     } catch (error) {
       if (thisLoad !== latestLoad) return
@@ -199,8 +217,15 @@ export const useBoardStore = defineStore('board', () => {
       )
     }
 
+    // In a sorted list the drop position means nothing: the card takes its sorted place.
+    const isTargetManual = listSort(targetListId).mode === 'manual'
+    const targetLength = cardsByList.value[targetListId]?.length ?? 0
+
     take(sourceListId)
-    place(targetListId, targetIndex, { ...card, listId: targetListId })
+    place(targetListId, isTargetManual ? targetIndex : targetLength, {
+      ...card,
+      listId: targetListId,
+    })
     persistLayout()
     savingCardIds.value.add(cardId)
     try {
@@ -241,6 +266,9 @@ export const useBoardStore = defineStore('board', () => {
     status,
     loadError,
     load,
+    listSort,
+    setListSort,
+    displayedCards,
     moveCard,
     reorderCard,
     reorderLists,

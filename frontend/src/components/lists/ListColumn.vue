@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import draggable from 'vuedraggable'
 
 import ListHeader from './ListHeader.vue'
+import ListSortControl from './ListSortControl.vue'
 import CardItem from '@/components/cards/CardItem.vue'
 import AppIcon from '@/components/common/AppIcon.vue'
 import { useBoardStore } from '@/stores/board'
@@ -18,7 +19,9 @@ const emit = defineEmits<{ 'add-card': []; 'open-card': [card: Card] }>()
 
 const store = useBoardStore()
 
-const cards = computed(() => store.cardsByList[props.list.id] ?? [])
+const cards = computed(() => store.displayedCards(props.list.id))
+const sort = computed(() => store.listSort(props.list.id))
+const isManual = computed(() => sort.value.mode === 'manual')
 
 function onDragChange(change: CardDragChange) {
   if (change.added) {
@@ -32,18 +35,22 @@ function onDragChange(change: CardDragChange) {
 <template>
   <section class="list-column">
     <ListHeader :list="list" :card-count="cards.length" />
+    <ListSortControl :sort="sort" @change="store.setListSort(list.id, $event)" />
 
     <div class="list-column__body">
       <p v-if="cards.length === 0" class="list-column__empty">No cards yet</p>
       <!--
         On touch screens, a short hold starts the drag so that swiping still scrolls.
         A card being saved cannot be dragged, which rules out overlapping updates.
+        While a sort is active, "sort" only disables reordering inside this list:
+        cards can still leave it or be dropped into it.
       -->
       <draggable
         class="list-column__cards"
         :model-value="cards"
         item-key="id"
         group="cards"
+        :sort="isManual"
         filter=".card-item--saving"
         ghost-class="card-item--ghost"
         :prevent-on-filter="false"

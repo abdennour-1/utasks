@@ -1,3 +1,4 @@
+import type { ListSort } from './cardSort'
 import { readJson, removeKey, writeJson } from './storage'
 
 /**
@@ -7,6 +8,7 @@ import { readJson, removeKey, writeJson } from './storage'
 export interface BoardLayout {
   lists: string[]
   cards: Record<string, string[]>
+  sorts: Record<string, ListSort>
 }
 
 function layoutKey(boardId: string): string {
@@ -15,7 +17,7 @@ function layoutKey(boardId: string): string {
 
 export function loadBoardLayout(boardId: string): BoardLayout {
   const stored = readJson<Partial<BoardLayout>>(layoutKey(boardId))
-  return { lists: stored?.lists ?? [], cards: stored?.cards ?? {} }
+  return { lists: stored?.lists ?? [], cards: stored?.cards ?? {}, sorts: stored?.sorts ?? {} }
 }
 
 export function saveBoardLayout(boardId: string, layout: BoardLayout): void {

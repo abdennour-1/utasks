@@ -64,7 +64,8 @@ function toggleDirection() {
 }
 
 .list-sort__select {
-  flex: 1;
+  /* Wide enough for the longest option: the direction button wraps below it if needed. */
+  flex: 1 1 200px;
   min-width: 0;
   min-height: 28px;
   padding: 2px 4px;

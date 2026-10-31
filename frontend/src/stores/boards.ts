@@ -34,6 +34,11 @@ export const useBoardsStore = defineStore('boards', () => {
       loadedFor = userId
       status.value = 'ready'
     } catch (error) {
+      // A failed refresh should not hide boards that are already on screen.
+      if (loadedFor === userId) {
+        toasts.error(`Could not refresh your boards. ${errorMessage(error)}`)
+        return
+      }
       loadError.value = errorMessage(error)
       status.value = 'error'
     }

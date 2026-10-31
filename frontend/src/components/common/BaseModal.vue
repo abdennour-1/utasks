@@ -1,6 +1,7 @@
 <script lang="ts">
-// Shared between instances: a confirmation can be stacked above the card details.
-let openModals = 0
+// Shared between instances: a confirmation can be stacked above the card details,
+// and only the top modal reacts to the keyboard.
+const openModals: symbol[] = []
 </script>
 
 <script setup lang="ts">
@@ -13,6 +14,7 @@ const emit = defineEmits<{ close: [] }>()
 
 const FOCUSABLE = 'a[href], button:not(:disabled), input, select, textarea'
 
+const modalId = Symbol('modal')
 const titleId = useId()
 const dialog = ref<HTMLElement | null>(null)
 let previouslyFocused: HTMLElement | null = null
@@ -22,7 +24,11 @@ function trapTab(event: KeyboardEvent) {
   const first = focusable?.[0]
   const last = focusable?.[focusable.length - 1]
   if (!first || !last) return
-  if (event.shiftKey && document.activeElement === first) {
+  // Focus can fall out of the modal, for instance when a focused button gets disabled.
+  if (!dialog.value?.contains(document.activeElement)) {
+    event.preventDefault()
+    first.focus()
+  } else if (event.shiftKey && document.activeElement === first) {
     event.preventDefault()
     last.focus()
   } else if (!event.shiftKey && document.activeElement === last) {
@@ -32,8 +38,8 @@ function trapTab(event: KeyboardEvent) {
 }
 
 function onKeydown(event: KeyboardEvent) {
+  if (openModals.at(-1) !== modalId) return
   if (event.key === 'Escape') {
-    event.stopPropagation()
     emit('close')
   } else if (event.key === 'Tab') {
     trapTab(event)
@@ -42,7 +48,8 @@ function onKeydown(event: KeyboardEvent) {
 
 onMounted(() => {
   previouslyFocused = document.activeElement as HTMLElement | null
-  openModals += 1
+  openModals.push(modalId)
+  document.addEventListener('keydown', onKeydown)
   document.body.style.overflow = 'hidden'
   // Focusing a field on touch devices would pop the keyboard over the form.
   const isTouch = window.matchMedia('(pointer: coarse)').matches
@@ -53,8 +60,9 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  openModals -= 1
-  if (openModals === 0) document.body.style.overflow = ''
+  openModals.splice(openModals.indexOf(modalId), 1)
+  document.removeEventListener('keydown', onKeydown)
+  if (openModals.length === 0) document.body.style.overflow = ''
   previouslyFocused?.focus()
 })
 </script>
@@ -69,7 +77,6 @@ onBeforeUnmount(() => {
         aria-modal="true"
         :aria-labelledby="titleId"
         tabindex="-1"
-        @keydown="onKeydown"
       >
         <header class="modal__header">
           <h2 :id="titleId" class="modal__title">{{ title }}</h2>

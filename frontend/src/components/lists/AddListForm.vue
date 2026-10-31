@@ -97,6 +97,7 @@ async function submit() {
   padding: 8px;
   border-radius: var(--radius-lg);
   background: var(--color-surface-muted);
+  color: var(--color-text);
 }
 
 .add-list__error {

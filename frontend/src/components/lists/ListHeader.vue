@@ -24,6 +24,10 @@ async function confirmDelete() {
 
 <template>
   <header class="list-header">
+    <span class="list-header__handle list-drag-handle" title="Drag to reorder this list">
+      <AppIcon name="grip" :size="18" />
+      <span class="visually-hidden">Drag to reorder this list</span>
+    </span>
     <InlineEdit
       class="list-header__name"
       :value="list.name"
@@ -47,7 +51,27 @@ async function confirmDelete() {
   display: flex;
   align-items: flex-start;
   gap: 2px;
-  padding: 6px 4px 2px 6px;
+  padding: 6px 4px 2px 2px;
+}
+
+.list-header__handle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: grab;
+  /* The whole gesture belongs to the drag: the browser must not treat it as a scroll. */
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.list-header__handle:hover {
+  background: rgb(9 30 66 / 10%);
 }
 
 .list-header__name {

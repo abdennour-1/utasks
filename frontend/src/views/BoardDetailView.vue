@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import draggable from 'vuedraggable'
 
 import CardFormModal from '@/components/cards/CardFormModal.vue'
 import AppIcon from '@/components/common/AppIcon.vue'
@@ -85,16 +86,33 @@ watch(() => props.id, store.load, { immediate: true })
         No lists yet. Add your first list to get started.
       </p>
 
-      <div class="board-page__canvas">
-        <div class="board-page__lists">
-          <ListColumn
-            v-for="list in store.lists"
-            :key="list.id"
-            :list="list"
-            @add-card="newCardListId = list.id"
-            @open-card="openedCardId = $event.id"
-          />
-        </div>
+      <div class="board-page__canvas" :class="{ 'board-page__canvas--dragging': store.isDragging }">
+        <draggable
+          class="board-page__lists"
+          :model-value="store.lists"
+          item-key="id"
+          group="lists"
+          handle=".list-drag-handle"
+          direction="horizontal"
+          ghost-class="list-column--ghost"
+          :animation="150"
+          :force-fallback="true"
+          :fallback-tolerance="4"
+          :fallback-on-body="true"
+          :scroll-sensitivity="70"
+          :scroll-speed="14"
+          @start="store.isDragging = true"
+          @end="store.isDragging = false"
+          @update:model-value="store.reorderLists"
+        >
+          <template #item="{ element }">
+            <ListColumn
+              :list="element"
+              @add-card="newCardListId = element.id"
+              @open-card="openedCardId = $event.id"
+            />
+          </template>
+        </draggable>
         <AddListForm />
       </div>
     </template>
@@ -196,5 +214,14 @@ watch(() => props.id, store.load, { immediate: true })
   .board-page__canvas {
     scroll-snap-type: x mandatory;
   }
+
+  /* Snapping would fight the auto-scroll that follows a dragged item. */
+  .board-page__canvas--dragging {
+    scroll-snap-type: none;
+  }
+}
+
+.board-page__lists :deep(.list-column--ghost) {
+  opacity: 0.45;
 }
 </style>
